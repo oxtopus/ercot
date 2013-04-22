@@ -31,7 +31,18 @@ setup(
   author_email = 'oxtopus@gmail.com',
   url = 'https://github.com/oxtopus/ercot',
   license = 'MIT',
+  package_dir = \
+    {
+      'ercot': 'ercot',
+      '': 'apps'
+    },
   packages = ['ercot'],
+  entry_points = \
+    {
+      'console_scripts': [
+        'system_wide_demand = system_wide_demand:system_wide_demand',
+      ]
+    },
   requires = map(str.strip, open('requirements.txt').readlines()),
   data_files = \
     {
