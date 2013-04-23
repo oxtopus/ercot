@@ -40,6 +40,7 @@ setup(
   entry_points = \
     {
       'console_scripts': [
+        'scrape = ercot.scraper:main',
         'system_wide_demand = system_wide_demand:system_wide_demand',
       ]
     },

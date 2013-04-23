@@ -12,19 +12,6 @@ from zipfile import ZipFile
 
 import grokpy
 
-parser = OptionParser()
-
-parser.add_option("-k", "--key", 
-  dest="apiKey",
-  metavar="KEY",
-  help="Grok API Key (Default: GROK_API_KEY environment variable)")
-
-parser.add_option("-a", "--api",
-  dest="apiUrl", 
-  metavar="URL",
-  help="Grok API Base URL")
-
-
 def collect(pattern, suffix='.zip'):
   """ Yield all records extracted from matching archived filenames """
 
@@ -104,6 +91,19 @@ class ErcotModelSpec(grokpy.ModelSpecification):
 def system_wide_demand():
   """ Main entry point. """
   
+  parser = OptionParser(usage="Usage: %prog [options] TARGET")
+
+  parser.add_option("-k", "--key", 
+    dest="apiKey",
+    metavar="KEY",
+    help="Grok API Key (Default: GROK_API_KEY environment variable)")
+
+  parser.add_option("-a", "--api",
+    dest="apiUrl", 
+    metavar="URL",
+    help="Grok API Base URL (Default: GROK_API_URL environment variable, " \
+         "otherwise grokpy default)")
+
   (options, args) = parser.parse_args()
   try:
     target = args.pop(0)
@@ -111,7 +111,6 @@ def system_wide_demand():
     parser.print_help()
     return
 
-  pending = set()
   name = target + ' ' + datetime.now().isoformat().partition('.')[0]
   
   """ Grok client """
@@ -130,32 +129,47 @@ def system_wide_demand():
   """ Create project """
   project = grok.createProject(name)
 
+  print project.name, 'project created (', project.id, ')'
+
   """ Create stream """
   streamSpec = ErcotStreamSpec(name)  
   ercotStream = project.createStream(streamSpec)
 
+  print ercotStream.name, 'stream created: (', ercotStream.id, ')'
+
   """ Populate stream with historical training data """
+
+  print 'Appending historical data to stream...',
+
   ercotStream.addRecords(map(ErcotStreamSpec.formatRecord, 
     sorted(collect(target))))
 
+  print 'Done.'
+
   """ Base model """
   ercotModel = project.createModel(ErcotModelSpec(name, ercotStream))
-  ercotModel.startSwarm()
-  pending.add(ercotModel)
+  print ercotModel.name, 'model created (', ercotModel.id, ')'
 
   """ Hour-ahead model """
   hourSpec = ErcotModelSpec(name + ' +1hr', ercotStream, predictionSteps=[4])
   ercotHourModel = project.createModel(hourSpec)
-  ercotHourModel.startSwarm()
-  pending.add(ercotHourModel)
+  print ercotHourModel.name, 'model created (', ercotHourModel.id, ')'
 
   """ Day-ahead model """
-  daySpec = ErcotModelSpec(name + '+24hrs', ercotStream, predictionSteps=[96])
+  daySpec = ErcotModelSpec(name + ' +24hrs', ercotStream, predictionSteps=[96])
   ercotDayModel = project.createModel(daySpec)
-  ercotDayModel.startSwarm()
-  pending.add(ercotDayModel)
+  print ercotDayModel.name, 'model created (', ercotDayModel.id, ')'
 
+  models = (ercotModel, ercotHourModel, ercotDayModel)
+
+  """ Start swarms """
+
+  for model in models:
+    model.startSwarm()
+  
   """ Monitor swarms """
+  pending = set(models)
+  print "Swarming",
   while pending:
     completed = set()
     for model in pending:
@@ -164,11 +178,23 @@ def system_wide_demand():
     
     for model in completed:
         pending.remove(model)
-    print '.',
+    print ".",
     sys.stdout.flush()
     time.sleep(5)
 
-  print 'Done!'
+  print "Done!"
+
+
+  width = max(len(model.name) for model in models)
+
+  print '\nModel' + ' ' * (width-4) + '| Error'
+  print '-' * (width+1) + '|' + '-' * 17
+
+  for model in models:
+    state = model.getSwarmState()
+    print ('{:<' + str(width) + '}').format(model.name), '|', \
+      state['results']['averageError']
+
 
 if __name__ == '__main__':
   system_wide_demand()
