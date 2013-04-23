@@ -36,7 +36,7 @@ the scraped data for training.
 Output will look something like this:
 
     data/SYSWIDEDEMANDNP6235_csv/201304* 2013-04-23T09:50:52 project created ( 18b0c03a-aaba-46a6-8605-34baefab544c )
-    data/SYSWIDEDEMANDNP6235_csv/201304* 2013-04-23T09:50:52 stream created: ( edbcc652-a790-4cd1-980f-d9668df27bed )
+    data/SYSWIDEDEMANDNP6235_csv/201304* 2013-04-23T09:50:52 stream created ( edbcc652-a790-4cd1-980f-d9668df27bed )
     Appending historical data to stream... Done.
     data/SYSWIDEDEMANDNP6235_csv/201304* 2013-04-23T09:50:52 model created ( ce86576f-6c4f-4d18-89cf-be336f852317 )
     data/SYSWIDEDEMANDNP6235_csv/201304* 2013-04-23T09:50:52 +1hr model created ( b2b1b024-c99e-49f4-a8d7-497a534fef41 )

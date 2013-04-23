@@ -10,7 +10,7 @@ except ImportError:
 
 base_path = os.path.dirname(__file__)
 with open(os.path.join(base_path, 'ercot', '__version__.py')) as fp:
-  version = re.compile(r".*__version__ = '(.*?)'", re.S)\
+  version = re.compile(r".*__version__ = '(.*?)'", re.S) \
               .match(fp.read()) \
               .group(1)
 
@@ -39,10 +39,10 @@ setup(
   packages = ['ercot'],
   entry_points = \
     {
-      'console_scripts': [
-        'scrape = ercot.scraper:main',
-        'system_wide_demand = system_wide_demand:system_wide_demand',
-      ]
+      'console_scripts': \
+        [
+          'system_wide_demand = system_wide_demand:system_wide_demand'
+        ]
     },
   requires = map(str.strip, open('requirements.txt').readlines()),
   data_files = \

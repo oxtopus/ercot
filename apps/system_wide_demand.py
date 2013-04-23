@@ -1,39 +1,11 @@
-import csv
-import glob
 import os
 import sys
 import time
 
-from collections import namedtuple
 from datetime import datetime
-from optparse import OptionParser
-from pprint import pprint
-from zipfile import ZipFile
 
+import core
 import grokpy
-
-def collect(pattern, suffix='.zip'):
-  """ Yield all records extracted from matching archived filenames """
-
-  walk = lambda pattern: (
-    os.path.join(dirpath, filename) 
-    for pathname in glob.glob(pattern) 
-    for (dirpath, dirnames, filenames) in os.walk(pathname) 
-    for filename in filenames
-  )
-
-  for path in walk(pattern):
-    if path.endswith(suffix):
-      with ZipFile(path, 'r') as archive:
-        for name in archive.namelist():
-          with archive.open(name, 'r') as inp:
-            csvin = csv.reader(inp)
-            Record = namedtuple('Record', next(inp))
-            for line in csvin:
-              try:
-                yield Record._make(line)
-              except TypeError:
-                pass
 
 
 class ErcotStreamSpec(grokpy.StreamSpecification):
@@ -91,24 +63,13 @@ class ErcotModelSpec(grokpy.ModelSpecification):
 def system_wide_demand():
   """ Main entry point. """
   
-  parser = OptionParser(usage="Usage: %prog [options] TARGET")
+  cli = core.getCLIParser()
 
-  parser.add_option("-k", "--key", 
-    dest="apiKey",
-    metavar="KEY",
-    help="Grok API Key (Default: GROK_API_KEY environment variable)")
-
-  parser.add_option("-a", "--api",
-    dest="apiUrl", 
-    metavar="URL",
-    help="Grok API Base URL (Default: GROK_API_URL environment variable, " \
-         "otherwise grokpy default)")
-
-  (options, args) = parser.parse_args()
+  (options, args) = cli.parse_args()
   try:
     target = args.pop(0)
   except IndexError:
-    parser.print_help()
+    cli.print_help()
     return
 
   name = target + ' ' + datetime.now().isoformat().partition('.')[0]
@@ -123,7 +84,7 @@ def system_wide_demand():
     elif 'GROK_API_KEY' not in os.environ:
       print "ERROR: Perhaps you did not specify an API Key?\n"
     
-    parser.print_help()  
+    cli.print_help()  
     return
 
   """ Create project """
@@ -135,14 +96,14 @@ def system_wide_demand():
   streamSpec = ErcotStreamSpec(name)  
   ercotStream = project.createStream(streamSpec)
 
-  print ercotStream.name, 'stream created: (', ercotStream.id, ')'
+  print ercotStream.name, 'stream created (', ercotStream.id, ')'
 
   """ Populate stream with historical training data """
 
   print 'Appending historical data to stream...',
 
   ercotStream.addRecords(map(ErcotStreamSpec.formatRecord, 
-    sorted(collect(target))))
+    sorted(core.collect(target))))
 
   print 'Done.'
 
@@ -165,7 +126,7 @@ def system_wide_demand():
   """ Start swarms """
 
   for model in models:
-    model.startSwarm()
+    model.startSwarm(size="small")
   
   """ Monitor swarms """
   pending = set(models)
@@ -184,6 +145,7 @@ def system_wide_demand():
 
   print "Done!"
 
+  """ Print results """
 
   width = max(len(model.name) for model in models)
 
