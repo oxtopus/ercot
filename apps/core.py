@@ -6,8 +6,6 @@ from collections import namedtuple
 from optparse import OptionParser
 from zipfile import ZipFile
 
-import core
-
 
 def collect(pattern, suffix='.zip'):
   """ Yield all records extracted from matching archived filenames """
