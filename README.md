@@ -23,8 +23,12 @@ Usage
     python -m ercot.scraper "http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12315&reportTitle=Short%20Term%20System%20Adequacy%20Report&showHTMLView=&mimicKey"
 
 
-Running the System-wide Demand Sample App
------------------------------------------
+### Running the System-wide Demand Sample App
+
+Bundled in this package is a sample application that demonstrates basic 
+functionality of the Grok API.  Three models are created predicting 1, 4, and 
+96 time steps ahead, representing 15 mins., 1 hr., and 1 day respectively using
+the scraped data for training.
 
     python -m ercot.scraper "http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12340&reportTitle=System-Wide%20Demand&showHTMLView=&mimicKey"
     system_wide_demand --key=YOUR_API_KEY_HERE "data/SYSWIDEDEMANDNP6235_csv/*"
