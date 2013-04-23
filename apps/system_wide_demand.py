@@ -126,7 +126,7 @@ def system_wide_demand():
   """ Start swarms """
 
   for model in models:
-    model.startSwarm(size="small")
+    model.startSwarm()
   
   """ Monitor swarms """
   pending = set(models)
