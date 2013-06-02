@@ -1,22 +1,13 @@
-import os
-import re
+from setuptools import setup
 
-from distutils.core import setup
+version = {}
+execfile('ercot/__version__.py', {}, version)
 
-try:
-    import setuptools
-except ImportError:
-    pass
-
-base_path = os.path.dirname(__file__)
-with open(os.path.join(base_path, 'ercot', '__version__.py')) as fp:
-  version = re.compile(r".*__version__ = '(.*?)'", re.S) \
-              .match(fp.read()) \
-              .group(1)
+requirements = map(str.strip, open('requirements.txt').readlines())
 
 setup(
   name = 'ercot',
-  version = version,
+  version = version['__version__'],
   description = "ERCOT Scraper",
   classifiers = \
     [
@@ -44,9 +35,10 @@ setup(
           'system_wide_demand = system_wide_demand:system_wide_demand'
         ]
     },
-  requires = map(str.strip, open('requirements.txt').readlines()),
+  requires = requirements,
+  install_requires = requirements,
   data_files = \
-    {
-      'conf': ['conf/logging.conf']
-    }.items(),
+    [
+      ('conf', ['conf/logging.conf'])
+    ]
 )
