@@ -22,23 +22,12 @@ setup(
   author_email = 'oxtopus@gmail.com',
   url = 'https://github.com/oxtopus/ercot',
   license = 'MIT',
+  namespace_packages = ['ercot'],
   package_dir = \
     {
-      'ercot': 'ercot',
-      '': 'apps'
+      'ercot': 'ercot'
     },
   packages = ['ercot'],
-  entry_points = \
-    {
-      'console_scripts': \
-        [
-          'system_wide_demand = system_wide_demand:system_wide_demand'
-        ]
-    },
   requires = requirements,
-  install_requires = requirements,
-  data_files = \
-    [
-      ('conf', ['conf/logging.conf'])
-    ]
+  install_requires = requirements
 )
