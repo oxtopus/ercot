@@ -2,7 +2,9 @@ ERCOT Scraper
 =============
 
 Simple python package for archiving [ERCOT](http://www.ercot.com/gridinfo/)
-data and processing the results with Grok.
+data.  See related project, 
+[ERCOT Sample Apps](https://github.com/oxtopus/ercot-apps), for sample 
+applications using this data.
 
 Installation
 ------------
